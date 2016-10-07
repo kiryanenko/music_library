@@ -58,8 +58,15 @@ sub printList {
     	}
 	}
 	
+	print '/';
+	my $sum = 0;
+	while ( my ($key, $value) = each($_) ) {
+		$sum += $value + 2
+    }
 	for (@musicList) {
-		
+		while ( my ($key, $value) = each($_) ) {
+			$maxLength{$key} = length $value if $maxLength{$key} < length $value;
+    	}
 	}
 }
 

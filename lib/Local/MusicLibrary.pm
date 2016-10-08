@@ -39,7 +39,7 @@ sub addTrack {
 	my %res;
 	
 	if ($source =~ m!^\./(.+)/(\d{4}) - (.+)/(.+)\.(.+)$!) {
-		$res{'group'} = $1;
+		$res{'band'} = $1;
 		$res{'year'} = $2;
 		$res{'album'} = $3;
 		$res{'track'} = $4;
@@ -54,20 +54,43 @@ p @musicLibrary;
 }
 
 sub getList {
-	my @musicList = @musicLibrary;
-	 
+	my %param = shift;
+		
+	my @musicList = grep {
+		my $flag = 1;
+		while ( my ($key, $value) = each($_) && $flag) {
+			$flag = ($value eq $param{$key} || !$param{$key});
+		}
+		$flag;
+	}, @musicLibrary;
+	
+	return @musicList;
+}
+
+sub sortList {
+	my %param = shift;
+		
+	my @musicList = grep {
+		my $flag = 1;
+		while ( my ($key, $value) = each($_) && $flag) {
+			$flag = ($value eq $param{$key} || !$param{$key});
+		}
+		$flag;
+	}, @musicLibrary;
+	
 	return @musicList;
 }
 
 sub printList {
+	my @musicList = shift;
+	
 	my %maxLength = (			# Хэш максимальных длинн столбцов
-		'group' => 0,
+		'band' => 0,
 		'year' => 0,
 		'album' => 0,
 		'track' => 0,
 		'format' => 0
 	);
-	my @musicList = @musicLibrary;
 			
 	for (@musicList) {		
 		while ( my ($key, $value) = each($_) ) {
@@ -88,7 +111,7 @@ sub printList {
 	for (@musicList) {
 		if ($flag) { say $dividingString; }
 		else { $flag = 1; }
-		say '| ', ' ' x ($maxLength{'group'} - length $$_{'group'}), $$_{'group'},
+		say '| ', ' ' x ($maxLength{'band'} - length $$_{'band'}), $$_{'band'},
 			' | ', ' ' x ($maxLength{'year'} - length $$_{'year'}), $$_{'year'},
 			' | ', ' ' x ($maxLength{'album'} - length $$_{'album'}), $$_{'album'},
 			' | ', ' ' x ($maxLength{'track'} - length $$_{'track'}), $$_{'track'},

@@ -54,35 +54,32 @@ p @musicLibrary;
 }
 
 sub getList {
-	my %param = shift;
-		
+	my $param = shift;
+	
 	my @musicList = grep {
 		my $flag = 1;
-		while ( my ($key, $value) = each($_) && $flag) {
-			$flag = ($value eq $param{$key} || !$param{$key});
+		while ((my ($key, $value) = each($_)) && $flag) {
+			$flag = (!defined $$param{"--$key"} || $value eq $$param{"--$key"});
 		}
 		$flag;
-	}, @musicLibrary;
+	} @musicLibrary;
 	
 	return @musicList;
 }
 
 sub sortList {
-	my %param = shift;
-		
-	my @musicList = grep {
-		my $flag = 1;
-		while ( my ($key, $value) = each($_) && $flag) {
-			$flag = ($value eq $param{$key} || !$param{$key});
-		}
-		$flag;
-	}, @musicLibrary;
+	my $param = shift;
+	my $musicList = shift;
+	die 'Неправильный параметр сортировки' if $param !~ /^(band|year|album|track|format)$/;
+	@$musicList = sort {
+		$param eq 'year' ? $$a{'year'} <=> $$b{'year'} : $$a{$param} cmp $$b{$param};
+	} @$musicList;
 	
-	return @musicList;
+	return @$musicList;
 }
 
 sub printList {
-	my @musicList = shift;
+	my $musicList = shift;
 	
 	my %maxLength = (			# Хэш максимальных длинн столбцов
 		'band' => 0,
@@ -92,23 +89,22 @@ sub printList {
 		'format' => 0
 	);
 			
-	for (@musicList) {		
+	for (@$musicList) {		
 		while ( my ($key, $value) = each($_) ) {
 			$maxLength{$key} = length $value if $maxLength{$key} < length $value;
     	}
 	}
 	
-	my $dividingString = '|';
-	while ( my ($key, $value) = each(%maxLength) ) {
-		$dividingString .= '+' unless length($dividingString) == 1;
-		$dividingString .= '-' x ($value + 2); 
-	}
-	$dividingString .= "|";
+	my $dividingString = '|'.('-' x ($maxLength{'band'} + 2)).
+		'+'.('-' x ($maxLength{'year'} + 2)).
+		'+'.('-' x ($maxLength{'album'} + 2)).
+		'+'.('-' x ($maxLength{'track'} + 2)).
+		'+'.('-' x ($maxLength{'format'} + 2)).'|';
 
 	say '/', '-' x (length($dividingString) - 2), "\\";
 	
 	my $flag = '';
-	for (@musicList) {
+	for (@$musicList) {
 		if ($flag) { say $dividingString; }
 		else { $flag = 1; }
 		say '| ', ' ' x ($maxLength{'band'} - length $$_{'band'}), $$_{'band'},

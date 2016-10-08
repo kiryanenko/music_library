@@ -53,6 +53,12 @@ sub addTrack {
 p @musicLibrary;
 }
 
+sub getList {
+	my @musicList = @musicLibrary;
+	 
+	return @musicList;
+}
+
 sub printList {
 	my %maxLength = (			# Хэш максимальных длинн столбцов
 		'group' => 0,
@@ -89,7 +95,7 @@ sub printList {
 			' | ', ' ' x ($maxLength{'format'} - length $$_{'format'}), $$_{'format'},
 			' |';
 	}
-	say '/', '-' x (length($dividingString) - 2), "\\";
+	say '\\', '-' x (length($dividingString) - 2), "/";
 }
 
 1;

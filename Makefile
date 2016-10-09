@@ -185,13 +185,10 @@ PERL_ARCHIVEDEP    =
 PERL_ARCHIVE_AFTER = 
 
 
-TO_INST_PM = lib/Local/MusicLibrary.pm \
-	lib/Tokenize.pm
+TO_INST_PM = lib/Local/MusicLibrary.pm
 
 PM_TO_BLIB = lib/Local/MusicLibrary.pm \
-	blib/lib/Local/MusicLibrary.pm \
-	lib/Tokenize.pm \
-	blib/lib/Tokenize.pm
+	blib/lib/Local/MusicLibrary.pm
 
 
 # --- MakeMaker platform_constants section:
@@ -491,7 +488,7 @@ realclean_subdirs :
 # Delete temporary files (via clean) and also delete dist files
 realclean purge ::  clean realclean_subdirs
 	- $(RM_F) \
-	  $(FIRST_MAKEFILE) $(MAKEFILE_OLD) 
+	  $(MAKEFILE_OLD) $(FIRST_MAKEFILE) 
 	- $(RM_RF) \
 	  $(DISTVNAME) 
 
@@ -850,8 +847,7 @@ ppd :
 
 pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', q[$(PM_FILTER)], '\''$(PERM_DIR)'\'')' -- \
-	  lib/Local/MusicLibrary.pm blib/lib/Local/MusicLibrary.pm \
-	  lib/Tokenize.pm blib/lib/Tokenize.pm 
+	  lib/Local/MusicLibrary.pm blib/lib/Local/MusicLibrary.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
 

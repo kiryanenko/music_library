@@ -31,6 +31,7 @@ our $VERSION = '1.00';
 =cut
 
 my @musicLibrary;
+our @columns = ('band', 'year', 'album', 'track', 'format');
 
 # Функция парсит строку с путем к файлу и добавляет в массив @musicLibrary
 sub addTrack {

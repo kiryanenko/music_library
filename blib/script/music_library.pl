@@ -4,7 +4,9 @@ use strict;
 use warnings;
 
 use FindBin;
-require "$FindBin::Bin/../lib/Local/MusicLibrary.pm";
+use lib "$FindBin::Bin/../lib";
+use Local::MusicLibrary;
+use Getopt::Long;
 
 BEGIN{
 	if ($] < 5.018) {
@@ -14,8 +16,15 @@ BEGIN{
 }
 no warnings 'experimental';
 
-my %param = (@ARGV);
-@ARGV = ();
+my %selections;
+
+my $sort;
+my $columns;
+GetOptions(
+	\%selections, (map {"$_=s"} @Local::MusicLibrary::columns),
+	'sort=s' => \$sort,
+	'columns=s' => \$columns
+);
 
 while (<>) {
 	next if /^\s*$/;
@@ -27,6 +36,6 @@ while (<>) {
 	
 }
 
-my @musicList = Local::MusicLibrary::getList(\%param);
-@musicList = Local::MusicLibrary::sortList($param{'--sort'}, \@musicList);
-Local::MusicLibrary::printList(\@musicList, $param{'--columns'});
+my @musicList = Local::MusicLibrary::getList(\%selections);
+@musicList = Local::MusicLibrary::sortList($sort, \@musicList);
+Local::MusicLibrary::printList(\@musicList, $columns);

@@ -31,7 +31,9 @@ our $VERSION = '1.00';
 =cut
 
 my @musicLibrary;
+our @columns = ('band', 'year', 'album', 'track', 'format');
 
+# Функция парсит строку с путем к файлу и добавляет в массив @musicLibrary
 sub addTrack {
 	my $source = shift;
 	my %res;
@@ -49,6 +51,7 @@ sub addTrack {
 	push @musicLibrary, {%res};
 }
 
+# Функция возвращает список всех композиций удовлетворяющих параметрам
 sub getList {
 	my $param = shift;
 	
@@ -65,6 +68,7 @@ sub getList {
 	return @musicList;
 }
 
+# Функция возвращает отсортированный список композиций согласно параметрам
 sub sortList {
 	my $param = shift;
 	my $musicList = shift;
@@ -78,6 +82,7 @@ sub sortList {
 	return @$musicList;
 }
 
+# Функция печатает таблицу списка композиций согласно параметрам
 sub printList {
 	my $musicList = shift;
 	my $param = shift;

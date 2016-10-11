@@ -97,4 +97,9 @@ sub sortList {
 	return @$musicList;
 }
 
+# Функция очистки библиотеки
+sub clear {
+	@musicLibrary = [];
+}
+
 1;

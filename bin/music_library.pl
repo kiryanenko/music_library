@@ -3,10 +3,12 @@
 use strict;
 use warnings;
 
+use Getopt::Long;
+
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Local::MusicLibrary;
-use Getopt::Long;
+use Local::PrintMusicList;
 
 BEGIN{
 	if ($] < 5.018) {
@@ -21,21 +23,26 @@ my %selections;
 my $sort;
 my $columns;
 GetOptions(
-	\%selections, (map {"$_=s"} @Local::MusicLibrary::columns),
+	\%selections, (map {"$_=s"} keys %Local::MusicLibrary::columns),
 	'sort=s' => \$sort,
 	'columns=s' => \$columns
 );
 
 while (<>) {
+last if /^q$/;
 	next if /^\s*$/;
 	eval {		
 		Local::MusicLibrary::addTrack($_);
 	1} or do {
 		print "Error: $@";
 	};
-	
 }
 
 my @musicList = Local::MusicLibrary::getList(\%selections);
 @musicList = Local::MusicLibrary::sortList($sort, \@musicList);
-Local::MusicLibrary::printList(\@musicList, $columns);
+if (defined $columns) {
+	my @columns = split /,/, $columns if defined $columns;
+	Local::PrintMusicList::printList(\@musicList, \@columns );
+} else {
+	Local::PrintMusicList::printList(\@musicList)
+}

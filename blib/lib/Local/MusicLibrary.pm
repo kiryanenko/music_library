@@ -3,6 +3,7 @@ package Local::MusicLibrary;
 use 5.010;
 use strict;
 use warnings;
+use Tie::IxHash;
 
 BEGIN{
 	if ($] < 5.018) {
@@ -31,14 +32,21 @@ our $VERSION = '1.00';
 =cut
 
 my @musicLibrary;
-our @columns = ('band', 'year', 'album', 'track', 'format');
+tie our %columns, "Tie::IxHash";
+%columns = (
+	'band' => 'string', 
+	'year' => 'numeric', 
+	'album' => 'string', 
+	'track' => 'string', 
+	'format' => 'string'
+);
 
 # Функция парсит строку с путем к файлу и добавляет в массив @musicLibrary
 sub addTrack {
 	my $source = shift;
 	my %res;
 	
-	if ($source =~ m!^\./(.+)/(\d+) - (.+)/(.+)\.(.+)$!) {
+	if ($source =~ m!^\./(.+)/(\d+) - (.+)/(.+)\.(\w+)$!) {
 		$res{'band'} = $1;
 		$res{'year'} = "$2";
 		$res{'album'} = $3;
@@ -53,14 +61,16 @@ sub addTrack {
 
 # Функция возвращает список всех композиций удовлетворяющих параметрам
 sub getList {
-	my $param = shift;
+	my $params = shift;
 	
 	my @musicList = grep {
 		my $flag = 1;
-		while ((my ($key, $value) = each($_)) && $flag) {
-			$flag = !defined $$param{"--$key"} || 
-				($key eq 'year' ? $value == $$param{"--year"} :
-					$value eq $$param{"--$key"});
+		while ((my ($key, $value) = each(%$params)) && $flag) {
+			my $v = $_->{$key};	
+			given ($columns{$key}) {
+				when ('string') { $flag = $value eq $v; }
+				when ('numeric') { $flag = $value == $v; }
+			}
 		}
 		$flag;
 	} @musicLibrary;
@@ -74,56 +84,17 @@ sub sortList {
 	my $musicList = shift;
 	
 	if (defined $param) {
-		die 'Неправильный параметр сортировки' if $param !~ /^(band|year|album|track|format)$/;
+		die 'Неправильный параметр сортировки' if keys %columns ~~ $param;
 		@$musicList = sort {
-			$param eq 'year' ? $$a{'year'} <=> $$b{'year'} : $$a{$param} cmp $$b{$param};
+			my $res;
+			given ($columns{$param}) {
+				when ('string') {  $res = $a->{$param} cmp $b->{$param}; }
+				when ('numeric') { $res = $a->{$param} <=> $b->{$param}; }
+			}
+			$res;
 		} @$musicList;
 	}
 	return @$musicList;
-}
-
-# Функция печатает таблицу списка композиций согласно параметрам
-sub printList {
-	my $musicList = shift;
-	my $param = shift;
-	my @columns = ('band', 'year', 'album', 'track', 'format');
-	@columns = split /,/, $param if defined $param;
-	
-	if (@$musicList && @columns) {
-		my %maxLength = (			# Хэш максимальных длинн столбцов
-			'band' => 0,
-			'year' => 0,
-			'album' => 0,
-			'track' => 0,
-			'format' => 0
-		);
-			
-		for (@$musicList) {
-			while ( my ($key, $value) = each($_) ) {
-				$maxLength{$key} = length $value if $maxLength{$key} < length $value;
-			}
-		}
-		
-		my $dividingString = '|';
-		for (@columns) {
-			$dividingString .= '+' unless $dividingString eq '|';
-			$dividingString .= '-' x ($maxLength{$_} + 2);
-		}
-		$dividingString .= '|';
-
-		say '/', '-' x (length($dividingString) - 2), "\\";
-	
-		my $flag = '';
-		for (@$musicList) {
-			if ($flag) { say $dividingString; }
-			else { $flag = 1; }
-			for my $key (@columns) {
-				print '| ', ' ' x ($maxLength{$key} - length $$_{$key}), $$_{$key}, ' ';
-			}
-			say '|';
-		}
-		say '\\', '-' x (length($dividingString) - 2), "/";
-	}
 }
 
 1;

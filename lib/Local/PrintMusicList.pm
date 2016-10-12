@@ -16,14 +16,11 @@ no warnings 'experimental';
 # Функция печатает таблицу списка композиций согласно параметрам
 sub printList {
 	my $musicList = shift;
-	my $param = shift;
-	my @columns;
-	if (defined $param) { @columns = @$param }
-	else { @columns = (keys %Local::MusicLibrary::columns); } 
+	my $columns = shift || [keys %Local::MusicLibrary::columns];
 	
-	if (@$musicList && @columns) {
+	if (@$musicList && @$columns) {
 		my %maxLength;		# Хэш максимальных длинн столбцов
-		for (@columns) { $maxLength{$_} = 0; }
+		for (@$columns) { $maxLength{$_} = 0; }
 
 		for (@$musicList) {
 			while ( my ($key, $value) = each(%maxLength) ) {
@@ -31,25 +28,18 @@ sub printList {
 			}
 		}
 		
-		my $dividingString = '|';
-		for (@columns) {
-			$dividingString .= '+' unless $dividingString eq '|';
-			$dividingString .= '-' x ($maxLength{$_} + 2);
-		}
-		$dividingString .= '|';
+		my $dividingString = "\n|".join('+', 
+			map { '-' x ($maxLength{$_} + 2) } @$columns)."|\n";
 
-		say '/', '-' x (length($dividingString) - 2), "\\";
+		say '/', '-' x (length($dividingString) - 4), "\\";
 	
-		my $flag = '';
-		for (@$musicList) {
-			if ($flag) { say $dividingString; }
-			else { $flag = 1; }
-			for my $key (@columns) {
-				printf '| %'.$maxLength{$key}.'s ', $_->{$key};
-			}
-			say '|';
-		}
-		say '\\', '-' x (length($dividingString) - 2), "/";
+		say join $dividingString, map {
+			my $el = $_;
+			sprintf '|'.join('|', map { ' %'.$maxLength{$_}.'s ' } @$columns).'|', 
+				map { $el->{$_}	} @$columns;
+		} @$musicList;
+	
+		say '\\', '-' x (length($dividingString) - 4), "/";
 	}
 }
 

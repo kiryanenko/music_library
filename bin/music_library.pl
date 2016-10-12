@@ -41,7 +41,7 @@ last if /^q$/;
 my @musicList = Local::MusicLibrary::getList(\%selections);
 @musicList = Local::MusicLibrary::sortList($sort, \@musicList);
 if (defined $columns) {
-	my @columns = split /,/, $columns if defined $columns;
+	my @columns = split /,/, $columns;
 	Local::PrintMusicList::printList(\@musicList, \@columns );
 } else {
 	Local::PrintMusicList::printList(\@musicList)

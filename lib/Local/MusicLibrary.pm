@@ -65,11 +65,11 @@ sub getList {
 	
 	my @musicList = grep {
 		my $flag = 1;
-		while ((my ($key, $value) = each(%$params)) && $flag) {
+		while (my ($key, $value) = each(%$params)) {
 			my $v = $_->{$key};	
 			given ($columns{$key}) {
-				when ('string') { $flag = $value eq $v; }
-				when ('numeric') { $flag = $value == $v; }
+				when ('string') { $flag &&= $value eq $v; }
+				when ('numeric') { $flag &&= $value == $v; }
 			}
 		}
 		$flag;
